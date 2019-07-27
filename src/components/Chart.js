@@ -1,6 +1,7 @@
 import React from "react";
 import Card from "@material-ui/core/Card";
 import CardHeader from "./CardHeader";
+// import { connect } from "react-redux";
 import CardContent from "@material-ui/core/CardContent";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -44,6 +45,17 @@ const data = [
   },
 ];
 
+const CustomToolTip = ({active, payload, label}) => {
+if (active) {
+  return(
+    <div className="custom-tooltip">
+    <p className="label">{`${label} : ${payload[0].value}`}</p>
+    <p className="desc">Anything you want can be displayed here.</p>
+  </div>
+  )
+}
+return null;
+}
 
 export default () => {
   
@@ -60,10 +72,10 @@ export default () => {
           top: 5, right: 30, left: 20, bottom: 5,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid strokeDasharray="4 4" />
         <XAxis dataKey="name" />
         <YAxis />
-        <Tooltip />
+        <Tooltip content={CustomToolTip}/>
         <Legend />
         <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
         <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
