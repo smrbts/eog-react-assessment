@@ -4,6 +4,7 @@ import CardHeader from "./CardHeader";
 // import { connect } from "react-redux";
 import CardContent from "@material-ui/core/CardContent";
 import { makeStyles } from "@material-ui/core/styles";
+import ChartNavBar from './ChartNavBar'
 import {
   LineChart, 
   Line, 
@@ -45,24 +46,24 @@ const data = [
   },
 ];
 
-const CustomToolTip = ({active, payload, label}) => {
-if (active) {
-  return(
-    <div className="custom-tooltip">
-    <p className="label">{`${label} : ${payload[0].value}`}</p>
-    <p className="desc">Anything you want can be displayed here.</p>
-  </div>
-  )
-}
-return null;
-}
+// const CustomToolTip = ({active, payload, label}) => {
+// if (active) {
+//   return(
+//     <div className="custom-tooltip">
+//     <p className="label">{`${label} : ${payload[0].value}`}</p>
+//     <p className="desc">Anything you want can be displayed here.</p>
+//   </div>
+//   )
+// }
+// return null;
+// }
 
 export default () => {
-  
   const classes = useStyles();
   return (
     <Card className={classes.card}>
       <CardHeader title="Graph Visualization" />
+      <ChartNavBar/>
       <CardContent>
       <LineChart
         width={1200}
@@ -75,7 +76,7 @@ export default () => {
         <CartesianGrid strokeDasharray="4 4" />
         <XAxis dataKey="name" />
         <YAxis />
-        <Tooltip content={CustomToolTip}/>
+        <Tooltip />
         <Legend />
         <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
         <Line type="monotone" dataKey="uv" stroke="#82ca9d" />

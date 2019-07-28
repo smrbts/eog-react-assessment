@@ -1,14 +1,23 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import * as actions from "../store/actions";
-import { Provider, createClient, useQuery } from "urql";
+import SubscriptionClient from 'subscriptions-transport-ws'
+import { Provider, createClient, useSubscription, defaultExchanges, subscriptionExchange } from "urql";
 import { useGeolocation } from "react-use";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import Chip from "./Chip";
+
+const subscriptionClient = new SubscriptionClient("https://react.eogresources.com/graphql", {})
+
 
 const client = createClient({
-  url: "https://react.eogresources.com/graphql"
-});
+    url: "https://react.eogresources.com/graphql",
+    exchanges: [
+      ...defaultExchanges,
+      subscriptionExchange({
+        forwardSubscription: operation => subscriptionClient.request(operation)
+      })
+    ]
+  });
 
 const query = `
 query($latLong: WeatherQuery!) {
@@ -20,24 +29,30 @@ query($latLong: WeatherQuery!) {
 }
 `;
 
-const getWeather = state => {
-  const { temperatureinFahrenheit, description, locationName } = state.weather;
+const tubingPressureQuery = `
+subscription newMeasurement()
+
+`
+
+const getTubingPressure = state => {
+  const { metric, value, unit, at } = state.tubingPressure;
   return {
-    temperatureinFahrenheit,
-    description,
-    locationName
+    metric,
+    value,
+    unit,
+    at
   };
 };
 
 export default () => {
   return (
     <Provider value={client}>
-      <Weather />
+      <TubingPressure />
     </Provider>
   );
 };
 
-const Weather = () => {
+const TubingPressure = () => {
   const getLocation = useGeolocation();
   // Default to houston
   const latLong = {
@@ -45,15 +60,15 @@ const Weather = () => {
     longitude: getLocation.longitude || -95.3698
   };
   const dispatch = useDispatch();
-  const { temperatureinFahrenheit, description, locationName } = useSelector(
-    getWeather
+  const { metric, value, unit, at } = useSelector(
+    getTubingPressure
   );
   
-  const [result] = useQuery({
-    query,
-    variables: {
-      latLong
-    }
+  
+
+  const [result] = useSubscription({
+    query: tubingPressureQuery,
+    variables: {}
   });
   const { fetching, data, error } = result;
   useEffect(
@@ -63,17 +78,11 @@ const Weather = () => {
         return;
       }
       if (!data) return;
-      const { getWeatherForLocation } = data;
-      dispatch({ type: actions.WEATHER_DATA_RECEIVED, getWeatherForLocation });
+      const { getTubingPressureFeed } = data;
+      dispatch({ type: actions.TUBING_PRESSURE_RECEIVED, getTubingPressureFeed });
     },
     [dispatch, data, error]
   );
 
   if (fetching) return <LinearProgress />;
-
-  return (
-    <Chip
-      label={`Weather in ${locationName}: ${description} and ${temperatureinFahrenheit}°`}
-    />
-  );
 };

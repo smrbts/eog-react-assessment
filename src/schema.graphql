@@ -1,0 +1,54 @@
+directive @cacheControl(
+  maxAge: Int
+  scope: CacheControlScope
+) on FIELD_DEFINITION | OBJECT | INTERFACE
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
+
+type Measurement {
+  metric: String!
+  at: Timestamp!
+  value: Float!
+  unit: String!
+}
+
+input MeasurementQuery {
+  metricName: String!
+  after: Timestamp
+  before: Timestamp
+}
+
+type MultipleMeasurements {
+  metric: String!
+  measurements: [Measurement]
+}
+
+type Query {
+  heartBeat: Timestamp
+  getWeatherForLocation(latLong: WeatherQuery!): Weather
+  getMetrics: [String]
+  getLastKnownMeasurement(metricName: String!): Measurement
+  getMeasurements(input: MeasurementQuery): [Measurement]
+  getMultipleMeasurements(input: [MeasurementQuery]): [MultipleMeasurements]
+}
+
+type Subscription {
+  newMeasurement: Measurement
+}
+
+scalar Timestamp
+
+scalar Upload
+
+type Weather {
+  description: String!
+  locationName: String!
+  temperatureinCelsius: Float!
+}
+
+input WeatherQuery {
+  latitude: Float!
+  longitude: Float!
+}
