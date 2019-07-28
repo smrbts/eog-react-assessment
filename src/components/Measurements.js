@@ -1,60 +1,71 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import * as actions from "../store/actions";
-import { Provider, createClient, useQuery } from "urql";
-import { useGeolocation } from "react-use";
+import { Provider, createClient, useSubscription, defaultExchanges, subscriptionExchange } from "urql";
+import { SubscriptionClient } from "subscriptions-transport-ws"
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Chip from "./Chip";
 
+const subscriptionClient = new SubscriptionClient("ws://react.eogresources.com/graphql", {})
+
 const client = createClient({
-  url: "https://react.eogresources.com/graphql"
+  url: "https://react.eogresources.com/graphql",
+  exchanges: [...defaultExchanges, subscriptionExchange({
+      forwardSubscription: operation => subscriptionClient.request(operation)
+  })]
 });
 
-const query = `
-query($latLong: WeatherQuery!) {
-  getWeatherForLocation(latLong: $latLong) {
-    description
-    locationName
-    temperatureinCelsius
-  }
-}
-`;
+// const query = `
+// query($latLong: WeatherQuery!) {
+//   getWeatherForLocation(latLong: $latLong) {
+//     description
+//     locationName
+//     temperatureinCelsius
+//   }
+// }
+// `;
 
-const getWeather = state => {
-  const { temperatureinFahrenheit, description, locationName } = state.weather;
+const measurementSubscriptionQuery = `
+subscription{
+    newMeasurement{
+        metric
+        value
+        unit
+        at
+    }
+}
+
+`
+
+const getMeasurements = state => {
+  const { metric, value, unit, at } = state.measurements;
   return {
-    temperatureinFahrenheit,
-    description,
-    locationName
+    metric,
+    value,
+    unit,
+    at
   };
 };
 
 export default () => {
   return (
     <Provider value={client}>
-      <Weather />
+      <Measurements />
     </Provider>
   );
 };
 
-const Weather = () => {
-  const getLocation = useGeolocation();
-  // Default to houston
-  const latLong = {
-    latitude: getLocation.latitude || 29.7604,
-    longitude: getLocation.longitude || -95.3698
-  };
+const Measurements = () => {
   const dispatch = useDispatch();
-  const { temperatureinFahrenheit, description, locationName } = useSelector(
-    getWeather
+  const { metric, value, unit, at } = useSelector(
+    getMeasurements
   );
 
-  const [result] = useQuery({
-    query,
-    variables: {
-      latLong
-    }
+  const [result] = useSubscription({
+    query: measurementSubscriptionQuery,
+    variables: {}
   });
+
   const { fetching, data, error } = result;
   useEffect(
     () => {
@@ -63,8 +74,8 @@ const Weather = () => {
         return;
       }
       if (!data) return;
-      const { getWeatherForLocation } = data;
-      dispatch({ type: actions.WEATHER_DATA_RECEIVED, getWeatherForLocation });
+      const { newMeasurement } = data;
+      dispatch({ type: actions.MEASUREMENT_DATA_RECEIVED, newMeasurement });
     },
     [dispatch, data, error]
   );
@@ -73,7 +84,7 @@ const Weather = () => {
 
   return (
     <Chip
-      label={`Weather in ${locationName}: ${description} and ${temperatureinFahrenheit}°`}
+      label={`${metric}: ${value} ${unit} ${at}`}
     />
   );
 };
