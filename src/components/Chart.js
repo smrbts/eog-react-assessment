@@ -4,6 +4,7 @@ import CardHeader from "./CardHeader";
 // import { connect } from "react-redux";
 import CardContent from "@material-ui/core/CardContent";
 import { makeStyles } from "@material-ui/core/styles";
+import ChartSelectBox from "./ChartSelectBox"
 import {
   LineChart, 
   Line, 
@@ -17,7 +18,7 @@ import {
 
 const useStyles = makeStyles({
   card: {
-    margin: "5% 20%"
+    margin: "5% 5%"
   }
 });
 
@@ -40,9 +41,6 @@ const data = [
   {
     name: 'Page F', uv: 2390, pv: 3800, amt: 2500,
   },
-  {
-    name: 'Page G', uv: 3490, pv: 4300, amt: 2100,
-  },
 ];
 
 const CustomToolTip = ({active, payload, label}) => {
@@ -63,6 +61,7 @@ export default () => {
   return (
     <Card className={classes.card}>
       <CardHeader title="Graph Visualization" />
+      <ChartSelectBox/>
       <CardContent>
       <LineChart
         width={1200}
