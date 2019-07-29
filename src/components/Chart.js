@@ -18,7 +18,7 @@ import {
 
 const useStyles = makeStyles({
   card: {
-    margin: "5% 5%"
+    margin: "flex"
   }
 });
 
@@ -64,11 +64,11 @@ export default () => {
       <ChartSelectBox/>
       <CardContent>
       <LineChart
-        width={1200}
+        width={1800}
         height={400}
         data={data}
         margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
+          top: 5, right: 30, left: 100, bottom: 5,
         }}
       >
         <CartesianGrid strokeDasharray="4 4" />

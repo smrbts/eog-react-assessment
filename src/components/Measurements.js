@@ -1,9 +1,18 @@
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { 
+  useDispatch, 
+  useSelector 
+} from "react-redux";
 import * as actions from "../store/actions";
-import { Provider, createClient, useSubscription, defaultExchanges, subscriptionExchange } from "urql";
+import { 
+  Provider, 
+  createClient, 
+  useSubscription, 
+  defaultExchanges, 
+  subscriptionExchange 
+} from "urql";
 import { SubscriptionClient } from "subscriptions-transport-ws"
-import LinearProgress from "@material-ui/core/LinearProgress";
+// import LinearProgress from "@material-ui/core/LinearProgress";
 import Chip from "./Chip";
 
 const subscriptionClient = new SubscriptionClient("ws://react.eogresources.com/graphql", {})
@@ -66,7 +75,7 @@ const Measurements = () => {
     variables: {}
   });
 
-  const { fetching, data, error } = result;
+  const { data, error } = result;
   useEffect(
     () => {
       if (error) {
@@ -80,11 +89,31 @@ const Measurements = () => {
     [dispatch, data, error]
   );
 
-  if (fetching) return <LinearProgress />;
+//   if (fetching) return <LinearProgress />;
+
+const convertTime = (at) => {
+  let d = new Date(at)
+return d.toLocaleTimeString()
+}
+
+
+// const valueChipValues = (metric, value, unit) => {
+//     let metricArray = [{metric, value, unit}]
+//     // let tpFilter = metricArray.filter(metric => metric.value.includes(metric))
+//     // let tpValue = tpFilter.filter(() => metric === "tubingPressure")
+//     let metricValues = metricArray.map(m => m.value)
+//     return metricValues
+// }
+
+
+// console.log({metric, value, unit})
+
 
   return (
     <Chip
-      label={`${metric}: ${value} ${unit} ${at}`}
+      label={`${metric} ${value} ${unit} Time: ${convertTime(at)}`}
+      // label={`Tubing Pressure: ${value}${unit} Time: ${convertTime(at)}`}
     />
   );
+  
 };
