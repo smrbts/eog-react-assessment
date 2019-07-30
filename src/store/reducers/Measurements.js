@@ -7,14 +7,14 @@ const initialState = {
   at: ""
 };
 
-const measurementDataRecevied = (state, action) => {
-  const { getMeasurementFeed } = action;
+const measurementDataReceived = (state, action) => {
+  const { newMeasurement } = action;
   const {
     metric,
     value,
     unit,
     at
-  } = getMeasurementFeed;
+  } = newMeasurement;
 
   return {
     metric,
@@ -25,7 +25,7 @@ const measurementDataRecevied = (state, action) => {
 };
 
 const handlers = {
-  [actions.MEASUREMENT_DATA_RECEIVED]: measurementDataRecevied
+  [actions.MEASUREMENT_DATA_RECEIVED]: measurementDataReceived
 };
 
 export default (state = initialState, action) => {
