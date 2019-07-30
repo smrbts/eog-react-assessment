@@ -98,15 +98,30 @@ return d.toLocaleTimeString()
 
 
 // const valueChipValues = (metric, value, unit) => {
-//     let metricArray = [{metric, value, unit}]
-//     // let tpFilter = metricArray.filter(metric => metric.value.includes(metric))
+//     let metricArray = [{metric, value, unit}].filter(Boolean)
+//     let tpFilter = metricArray.filter(m => metric === "tubingPressure")
 //     // let tpValue = tpFilter.filter(() => metric === "tubingPressure")
 //     let metricValues = metricArray.map(m => m.value)
-//     return metricValues
+//     return metricArray
 // }
 
+// const filteredMetrics = [metric, value, unit]
+// .filter(Boolean);
 
-// console.log({metric, value, unit})
+// const sleep = (milliseconds) => {
+//   return new Promise(resolve => setTimeout(resolve, milliseconds))
+// }
+
+// const metricData = async () => {
+//   return Promise.resolve()
+//   .then(await sleep(1000))
+//   .then(() => {
+//     let populatedMetrics = filteredMetrics
+//     return populatedMetrics
+//   })
+// }
+
+// console.log(metricData())
 
 
   return (
