@@ -11,10 +11,12 @@ import { SubscriptionClient } from "subscriptions-transport-ws";
 import {  
   Provider, 
   createClient, 
+  useQuery,
   useSubscription, 
   defaultExchanges, 
   subscriptionExchange  } from "urql";
-import ChartPlaceHolder from "./ChartPlaceHolder"
+import DataVisualize from "./DataVisualize";
+
 
 const useStyles = makeStyles({
   card: {
@@ -31,6 +33,16 @@ const client = createClient({
   })]
 });
 
+const measurementQuery = `
+query($input: MeasurementQuery!) {
+  getMeasurements(input: $input) {
+    metric
+    at
+    value
+    unit
+  }
+}
+`;
 
 
 const measurementSubscriptionQuery = `
@@ -49,22 +61,41 @@ const handleSubscription = (measurements = [], response) => {
   return [response.newMeasurement, ...measurements];
 };
 
-export default () => {
+export default (props) => {
   return (
     <Provider value={client}>
-      <Dashboard />
+      <Dashboard {...props}/>
     </Provider>
   );
 };
 
 
 
-const Dashboard = () => {
+const Dashboard = (props) => {
+  const thirtyMinInterval = 30 * 60 * 1000;
+
   const classes = useStyles();
+
+  const input = {
+    metricName: String(props.metricName),
+    before: parseInt(props.loadTimestamp),
+    after: parseInt(props.loadTimestamp)-thirtyMinInterval,
+  };
+
+  const [result] = useQuery({
+    query: measurementQuery,
+    variables: {
+      input,
+    },
+  });
+  // console.log(result.data)
+
   const [res] = useSubscription({ query: measurementSubscriptionQuery }, handleSubscription);  
   if (!res.data) {
     return <p>No data</p>;
   }
+  console.log(result.data)
+
   //I know this is janky to put it kindly, but a MVP dashboard is now updating with working subscriptions.
   const filteredTubingP = res.data.filter(measurement => measurement.metric === "tubingPressure")
   const tpData = filteredTubingP.slice(0,1).map(measurement => measurement.value)
@@ -112,8 +143,7 @@ const Dashboard = () => {
           </ListItem>
         </List>
       </CardContent>
-      <ChartPlaceHolder/>
+      <DataVisualize query={result.data} data={res.data}/>
     </Card>
- 
   );
 };
