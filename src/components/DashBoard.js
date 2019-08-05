@@ -7,7 +7,14 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import { makeStyles } from "@material-ui/core/styles";
 import Avatar from "./Avatar";
-import Measurements from "./Measurements"
+import { SubscriptionClient } from "subscriptions-transport-ws";
+import {  
+  Provider, 
+  createClient, 
+  useSubscription, 
+  defaultExchanges, 
+  subscriptionExchange  } from "urql";
+import ChartPlaceHolder from "./ChartPlaceHolder"
 
 const useStyles = makeStyles({
   card: {
@@ -15,41 +22,98 @@ const useStyles = makeStyles({
   }
 });
 
+const subscriptionClient = new SubscriptionClient("ws://react.eogresources.com/graphql", {});
+
+const client = createClient({
+  url: "https://react.eogresources.com/graphql",
+  exchanges: [...defaultExchanges, subscriptionExchange({
+      forwardSubscription: operation => subscriptionClient.request(operation)
+  })]
+});
+
+
+
+const measurementSubscriptionQuery = `
+subscription{
+    newMeasurement{
+        metric
+        value
+        unit
+        at
+    }
+}
+
+`;
+
+const handleSubscription = (measurements = [], response) => {
+  return [response.newMeasurement, ...measurements];
+};
 
 export default () => {
+  return (
+    <Provider value={client}>
+      <Dashboard />
+    </Provider>
+  );
+};
+
+
+
+const Dashboard = () => {
   const classes = useStyles();
+  const [res] = useSubscription({ query: measurementSubscriptionQuery }, handleSubscription);  
+  if (!res.data) {
+    return <p>No data</p>;
+  }
+  //I know this is janky to put it kindly, but a MVP dashboard is now updating with working subscriptions.
+  const filteredTubingP = res.data.filter(measurement => measurement.metric === "tubingPressure")
+  const tpData = filteredTubingP.slice(0,1).map(measurement => measurement.value)
+  const filteredCasingP = res.data.filter(measurement => measurement.metric === "casingPressure")
+  const cpData = filteredCasingP.slice(0,1).map(measurement => measurement.value)
+  const filteredOilT = res.data.filter(measurement => measurement.metric === "oilTemp")
+  const otData = filteredOilT.slice(0,1).map(measurement => measurement.value)
+  const filteredFlareT = res.data.filter(measurement => measurement.metric === "flareTemp")
+  const ftData = filteredFlareT.slice(0,1).map(measurement => measurement.value)
+  const filteredWaterT = res.data.filter(measurement => measurement.metric === "waterTemp")
+  const wtData = filteredWaterT.slice(0,1).map(measurement => measurement.value)
+  const filteredInjValve = res.data.filter(measurement => measurement.metric === "injValveOpen")
+  const injValveData = filteredInjValve.slice(0,1).map(measurement => measurement.value)
+
+
+  //the design intent here was on each click of the avatar button, that selected metric's chart would load below to see historical data.
   return (
     <Card className={classes.card}>
       <CardHeader title="My Dashboard"/>
-      <Measurements/>
       <CardContent>
         <List>
           <ListItem>
-            <Avatar>TP</Avatar>
-            <ListItemText primary="Tubing Pressure: PSI" />
+            <Avatar onClick={() => console.log("Show me Tubing Pressure")}>TP</Avatar>
+            <ListItemText primary={`Tubing Pressure:${tpData} PSI`} />
           </ListItem>
           <ListItem>
             <Avatar>CP</Avatar>
-            <ListItemText primary="Casing Pressure: PSI" />
+            <ListItemText primary={`Casing Pressure:${cpData} PSI`} />
           </ListItem>
           <ListItem>
             <Avatar>OT</Avatar>
-            <ListItemText primary="Oil Temp: F" />
+            <ListItemText primary={`Oil Temp:${otData} F`} />
           </ListItem>
           <ListItem>
             <Avatar>FT</Avatar>
-            <ListItemText primary="Flare Temp: F" />
+            <ListItemText primary={`Flare Temp:${ftData} F`} />
           </ListItem>
           <ListItem>
             <Avatar>WT</Avatar>
-            <ListItemText primary="Water Temp: F" />
+            <ListItemText primary={`Water Temp:${wtData} F`} />
           </ListItem>
           <ListItem>
             <Avatar>IVO</Avatar>
-            <ListItemText primary="injValve Open: %" />
+            <ListItemText primary={`injValve Open:${injValveData} %`} />
           </ListItem>
         </List>
       </CardContent>
+      <ChartPlaceHolder/>
     </Card>
+ 
   );
 };
