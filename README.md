@@ -10,9 +10,12 @@
 - React Hooks
 
 # Features
-Currently, this app has a layout of an app's UI interface, with models in place for demonstration. 
+Currently Working:
+-Live subscription feed to dashboard
+-Graph visualization(kind of)
 
-A live subscription of data is flowing through the front end and at your disposal to create whatever your heart desires!
+Working on/Issues:
+-Properly filter metrics with 30 minute time intervals
 
 # How to use
 
