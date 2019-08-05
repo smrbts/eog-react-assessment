@@ -7,12 +7,12 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import createSagaMiddleware from "redux-saga";
 import sagas from "./sagas";
 import weatherReducer from "./reducers/Weather";
-import measurementReducer from "./reducers/Measurements"
+import dataReducer from "./reducers/Data"
 
 export default () => {
   const rootReducer = combineReducers({
     weather: weatherReducer,
-    measurements: measurementReducer
+    data: dataReducer
   });
 
   const composeEnhancers = composeWithDevTools({});
